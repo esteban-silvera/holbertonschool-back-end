@@ -3,23 +3,33 @@
 
 
 import requests
-from sys import argv
+import sys
 
 
 if __name__ == "__main__":
-    """
-        access to the api
-    """
+    if len(sys.argv) != 2:
+        print(f"UsageError: python3 {__file__} employee_id(int)")
+        sys.exit(1)
 
-    url = "https://jsonplaceholder.typicode.com/"
-    employee_id = int(argv[1])
-    employee_data = requests.get(url + f'users/{employee_id}').json()
-    employee_task = requests.get(url + f'users/{employee_id}/todos').json()
+    API_URL = "https://jsonplaceholder.typicode.com"
+    EMPLOYEE_ID = sys.argv[1]
 
-    completed_tasks = [task for task in employee_task if task["completed"]]
+    response = requests.get(
+        f"{API_URL}/users/{EMPLOYEE_ID}/todos",
+        params={"_expand": "user"}
+    )
+    data = response.json()
 
-    print(f'Employee {employee_data["name"]} is done with ', end='')
-    print(f'tasks({len(completed_tasks)}/{len(employee_task)}):')
+    if not len(data):
+        print("RequestError:", 404)
+        sys.exit(1)
 
-    for task in completed_tasks:
-        print('\t ' + task["title"])
+    employee_name = data[0]["user"]["name"]
+    total_tasks = len(data)
+    done_tasks = [task for task in data if task["completed"]]
+    total_done_tasks = len(done_tasks)
+
+    print(f"Employee {employee_name} is done with tasks"
+          f"({total_done_tasks}/{total_tasks}):")
+    for task in done_tasks:
+        print(f"\t {task['title']}")
