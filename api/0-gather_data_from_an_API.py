@@ -7,16 +7,15 @@ from sys import argv
 
 
 if __name__ == "__main__":
-    api_url = f"https://jsonplaceholder.typicode.com/"
+    url = "https://jsonplaceholder.typicode.com/"
+    employee_id = int(argv[1])
+    employee_data = requests.get(url + f'users/{employee_id}').json()
+    employee_task = requests.get(url + f'users/{employee_id}/todos').json()
 
-    user_id = int(argv[1])
-    user_data = requests.get(api_url + f"users/{user_id}").json()
-    user_tasks = requests.get(api_url + f"users/{user_id}/todos").json()
+    completed_tasks = [task for task in employee_task if task["completed"]]
 
-    user_completed_tasks = [t for t in user_tasks if t["completed"]]
+    print(f'Employee {employee_data["name"]} is done with ', end='')
+    print(f'tasks({len(completed_tasks)}/{len(employee_task)}):')
 
-    print(f"Employee {user_data['name']} is done with ", end="")
-    print(f"tasks({len(user_completed_tasks)}/{len(user_tasks)}):")
-
-    for task in user_completed_tasks:
-        print("\t " + task["title"])
+    for task in completed_tasks:
+        print('\t ' + task["title"])
