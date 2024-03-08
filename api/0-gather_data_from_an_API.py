@@ -2,20 +2,33 @@
 """comments"""
 
 
-import requests
+from requests import get
 from sys import argv
 
 
 if __name__ == "__main__":
-    url = "https://jsonplaceholder.typicode.com/"
-    employee_id = int(argv[1])
-    employee_data = requests.get(url + f'users/{employee_id}').json()
-    employee_task = requests.get(url + f'users/{employee_id}/todos').json()
+    response = get('https://jsonplaceholder.typicode.com/todos/')
+    data = response.json()
+    completed = 0
+    total = 0
+    tasks = []
+    response2 = get('https://jsonplaceholder.typicode.com/users/')
+    data2 = response2.json()
 
-    completed_tasks = [task for task in employee_task if task["completed"]]
+    for i in data2:
+        if i.get('id') == int(argv[1]):
+            employee = i.get('name')
 
-    print(f'Employee {employee_data["name"]} is done with ', end='')
-    print(f'tasks({len(completed_tasks)}/{len(employee_task)}):')
+    for i in data:
+        if i.get('userId') == int(argv[1]):
+            total += 1
 
-    for task in completed_tasks:
-        print('\t ' + task["title"])
+            if i.get('completed') is True:
+                completed += 1
+                tasks.append(i.get('title'))
+
+    print("Employee {} is done with tasks({}/{}):".format(employee,
+                                                          completed, total))
+
+    for i in tasks:
+        print("\t {}".format(i))
